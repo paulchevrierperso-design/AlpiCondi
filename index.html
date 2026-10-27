@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Alpi, analyse exploratoire des conditions d'alpinisme hivernal depuis un point choisi sur la carte.">
+<title>Alpi - Analyse des conditions</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{color-scheme:light dark;--bg:#eef3f6;--panel:#fff;--text:#13202c;--muted:#64748b;--line:#d7e1e8;--blue:#075985;--cyan:#0ea5e9;--green:#15803d;--amber:#b45309;--red:#b91c1c;--soft:#f8fafc;--shadow:0 8px 24px rgba(15,23,42,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+header{padding:15px 20px;background:linear-gradient(115deg,#082f49,#0369a1);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px}header h1{margin:0;font-size:1.65rem}header p{margin:2px 0 0;opacity:.9;font-size:.87rem}.fresh{font-size:.78rem;text-align:right}
+.layout{display:grid;grid-template-columns:minmax(330px,390px) 1fr;min-height:calc(100vh - 77px)}aside{background:var(--panel);border-right:1px solid var(--line);padding:14px;overflow:auto;max-height:calc(100vh - 77px)}.workspace{min-width:0;display:grid;grid-template-rows:minmax(380px,52vh) auto}.map-wrap{position:relative}#map{height:100%;min-height:380px;background:#cbd5e1}.map-help{position:absolute;z-index:500;top:11px;left:50px;right:11px;background:rgba(255,255,255,.94);color:#17202a;border-radius:9px;padding:8px 11px;font-size:.8rem;box-shadow:var(--shadow);pointer-events:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:11px}.card h2,.card h3{margin:0 0 9px}.card h2{font-size:1rem}.card h3{font-size:.9rem}.notice{background:#fff7ed;color:#9a3412;border-color:#fed7aa;font-size:.8rem;line-height:1.4}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{margin-bottom:9px}.field label{font-size:.76rem;font-weight:750;display:block;margin-bottom:4px}.field input,.field select{width:100%;min-height:39px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--panel);color:var(--text);font:inherit}.field input:focus,.field select:focus,button:focus-visible{outline:3px solid rgba(14,165,233,.2);border-color:var(--cyan)}
+button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;min-height:39px;padding:7px 11px;font:inherit;font-weight:750;cursor:pointer}button.primary{background:var(--blue);border-color:var(--blue);color:#fff}button.secondary{background:#e0f2fe;color:#075985;border-color:#bae6fd}button.danger{color:var(--red)}button:disabled{opacity:.55;cursor:not-allowed}.actions{display:flex;gap:7px;flex-wrap:wrap}.status{font-size:.78rem;color:var(--muted);min-height:1.2em;margin-top:7px}.status.error{color:var(--red)}.status.ok{color:var(--green)}
+.saved-list{display:grid;gap:7px}.saved{border:1px solid var(--line);border-radius:9px;padding:9px;cursor:pointer}.saved:hover{border-color:var(--cyan)}.saved strong{display:block;font-size:.86rem}.saved span{font-size:.73rem;color:var(--muted)}
+.results{padding:14px;overflow:auto}.empty{text-align:center;color:var(--muted);padding:30px}.scores{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:10px;margin-bottom:12px}.score{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;position:relative;overflow:hidden}.score small{display:block;color:var(--muted);font-weight:700}.score b{font-size:1.7rem}.score .bar{height:5px;background:#e2e8f0;border-radius:99px;margin-top:8px;overflow:hidden}.score .bar i{display:block;height:100%;background:var(--cyan)}
+.panel-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:12px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}.panel h2{font-size:1rem;margin:0 0 9px}.chart-wrap{height:255px;position:relative}.chart-wrap canvas{width:100%;height:100%}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);margin-bottom:7px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fact{background:var(--soft);border-radius:9px;padding:9px}.fact small{display:block;color:var(--muted)}.factor-list{display:grid;gap:6px}.factor{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:5px 0;font-size:.8rem}.positive{color:var(--green)}.negative{color:var(--red)}.neutral{color:var(--muted)}
+.daily{display:grid;grid-template-columns:repeat(7,minmax(115px,1fr));gap:8px;overflow:auto}.day{border:1px solid var(--line);border-radius:10px;padding:9px;background:var(--soft)}.day strong{font-size:.8rem}.day .big{font-size:1.15rem;font-weight:800}.day p{font-size:.72rem;margin:4px 0;color:var(--muted)}.source{font-size:.7rem;color:var(--muted);line-height:1.35}.pill{display:inline-block;border-radius:99px;padding:3px 7px;background:#e0f2fe;color:#075985;font-size:.7rem;font-weight:750}.hidden{display:none!important}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.layout aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}.workspace{grid-template-rows:52vh auto}.scores{grid-template-columns:1fr 1fr}.panel-grid{grid-template-columns:1fr}}
+@media(max-width:520px){header{align-items:flex-start}.grid2,.facts{grid-template-columns:1fr}.scores{grid-template-columns:1fr 1fr}.score b{font-size:1.35rem}.map-help{left:10px}.workspace{grid-template-rows:48vh auto}}
+@media(prefers-color-scheme:dark){:root{--bg:#07111c;--panel:#101c29;--text:#e5eef7;--muted:#9fb1c4;--line:#2a3d4f;--soft:#162434;--blue:#0284c7}.notice{background:#321b10;color:#fdba74;border-color:#7c2d12}.map-help{background:rgba(16,28,41,.94);color:#e5eef7}.score .bar{background:#263849}.pill{background:#0c4a6e;color:#e0f2fe}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#101c29;color:#e5eef7}}
+</style>
+</head>
+<body>
+<header><div><h1>Alpi</h1><p>Prévision exploratoire des conditions à partir d’un point cartographique</p></div><div class="fresh" id="headerStatus">Aucun point analysé</div></header>
+<main class="layout">
+<aside>
+  <section class="card notice"><strong>Limite de sécurité :</strong> cet outil estime la formation et la conservation à partir de données météorologiques de grille. Il ne confirme ni la présence de glace, ni la stabilité du manteau, ni la praticabilité. Le danger avalanche doit être évalué séparément avec le BERA compétent, les observations terrain et la topographie complète de l’itinéraire.</section>
+  <section class="card">
+    <h2>1. Choisir la localisation</h2>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:0">Cliquez sur la carte ou saisissez des coordonnées.</p>
+    <div class="grid2"><div class="field"><label for="lat">Latitude</label><input id="lat" type="number" step="0.00001" min="-90" max="90" placeholder="42.70000"></div><div class="field"><label for="lng">Longitude</label><input id="lng" type="number" step="0.00001" min="-180" max="180" placeholder="0.10000"></div></div>
+    <div class="actions"><button id="locateBtn" type="button" class="secondary">Ma position</button><button id="placeBtn" type="button">Placer le point</button></div>
+  </section>
+  <section class="card">
+    <h2>2. Décrire la ligne</h2>
+    <div class="field"><label for="name">Nom du point / itinéraire</label><input id="name" maxlength="80" placeholder="Goulotte à surveiller"></div>
+    <div class="grid2"><div class="field"><label for="altitude">Altitude cible (m)</label><input id="altitude" type="number" min="0" max="5000" step="10" placeholder="Détection automatique"></div><div class="field"><label for="aspect">Orientation</label><select id="aspect"><option value="0">Nord</option><option value="45">Nord-Est</option><option value="90">Est</option><option value="135">Sud-Est</option><option value="180">Sud</option><option value="225">Sud-Ouest</option><option value="270">Ouest</option><option value="315">Nord-Ouest</option></select></div></div>
+    <div class="grid2"><div class="field"><label for="slope">Pente moyenne (°)</label><input id="slope" type="number" min="0" max="90" value="65"></div><div class="field"><label for="profile">Profil dominant</label><select id="profile"><option value="gully">Goulotte neige/glace</option><option value="ice">Glace / ruissellement</option><option value="snow">Couloir neigeux</option><option value="mixed">Mixte</option></select></div></div>
+    <div class="field"><label for="shading">Encaissement / ombrage</label><select id="shading"><option value="0.85">Fortement encaissé</option><option value="1" selected>Intermédiaire</option><option value="1.15">Très exposé au soleil</option></select></div>
+    <div class="actions"><button id="analyseBtn" class="primary" type="button">Analyser les conditions</button><button id="saveBtn" type="button">Enregistrer le point</button></div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+  </section>
+  <section class="card"><h2>Points enregistrés</h2><div id="savedList" class="saved-list"><div class="status">Aucun point enregistré.</div></div><div class="actions" style="margin-top:9px"><button id="clearBtn" class="danger" type="button">Tout supprimer</button></div></section>
+</aside>
+<section class="workspace">
+  <div class="map-wrap"><div id="map" aria-label="Carte de sélection"></div><div class="map-help">Cliquez sur la carte pour définir le point analysé. Le marqueur peut être déplacé.</div></div>
+  <div id="results" class="results"><div class="empty">Sélectionnez un point, renseignez l'altitude et l'orientation, puis lancez l'analyse.</div></div>
+</section>
+</main>
+<script>
+(() => {
+'use strict';
+const $=id=>document.getElementById(id), state={marker:null,data:null,current:null};
+const map=L.map('map',{zoomControl:true}).setView([44.0,3.0],6);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const fmt=(v,d=0)=>Number.isFinite(v)?v.toFixed(d):'—';
+const aspectNames={0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SO',270:'O',315:'NO'};
+function status(msg,type=''){ $('status').textContent=msg;$('status').className='status '+type }
+function setPoint(lat,lng,zoom=true){lat=clamp(Number(lat),-90,90);lng=clamp(Number(lng),-180,180);$('lat').value=lat.toFixed(5);$('lng').value=lng.toFixed(5);if(!state.marker){state.marker=L.marker([lat,lng],{draggable:true}).addTo(map);state.marker.on('dragend',e=>{const p=e.target.getLatLng();setPoint(p.lat,p.lng,false)})}else state.marker.setLatLng([lat,lng]);if(zoom)map.setView([lat,lng],11)}
+map.on('click',e=>setPoint(e.latlng.lat,e.latlng.lng,false));
+$('placeBtn').onclick=()=>{const lat=Number($('lat').value),lng=Number($('lng').value);if(!Number.isFinite(lat)||!Number.isFinite(lng))return status('Coordonnées invalides.','error');setPoint(lat,lng)};
+$('locateBtn').onclick=()=>{if(!navigator.geolocation)return status('Géolocalisation non disponible.','error');status('Recherche de la position…');navigator.geolocation.getCurrentPosition(p=>{setPoint(p.coords.latitude,p.coords.longitude);status('Position placée.','ok')},()=>status('Position non accessible. Cliquez directement sur la carte.','error'),{enableHighAccuracy:true,timeout:8000})};
+
+async function getJSON(url){const r=await fetch(url,{headers:{Accept:'application/json'}});if(!r.ok)throw new Error(`Service distant : HTTP ${r.status}`);return r.json()}
+async function getElevation(lat,lng){const u=`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`;const d=await getJSON(u);return Array.isArray(d.elevation)?Number(d.elevation[0]):null}
+async function getWeather(lat,lng,alt){
+ const hourly=['temperature_2m','relative_humidity_2m','dew_point_2m','precipitation','rain','snowfall','cloud_cover','wind_speed_10m','wind_direction_10m','wind_gusts_10m','shortwave_radiation','freezing_level_height'];
+ const daily=['temperature_2m_max','temperature_2m_min','precipitation_sum','rain_sum','snowfall_sum','wind_speed_10m_max','wind_gusts_10m_max','shortwave_radiation_sum'];
+ const q=new URLSearchParams({latitude:lat,longitude:lng,elevation:alt,timezone:'Europe/Paris',past_days:'10',forecast_days:'7',hourly:hourly.join(','),daily:daily.join(',')});
+ return getJSON('https://api.open-meteo.com/v1/forecast?'+q.toString())
+}
+function solarFactor(aspectDeg,slopeDeg,hour,date,lat,shading){
+ const doy=Math.floor((date-new Date(date.getFullYear(),0,0))/86400000),decl=23.44*Math.sin((2*Math.PI/365)*(doy-81)),ha=(hour-12)*15;
+ const r=Math.PI/180,phi=lat*r,del=decl*r,H=ha*r,beta=slopeDeg*r,gamma=aspectDeg*r;
+ const sinAlt=Math.sin(phi)*Math.sin(del)+Math.cos(phi)*Math.cos(del)*Math.cos(H);if(sinAlt<=0)return 0;
+ const cosInc=Math.sin(del)*(Math.sin(phi)*Math.cos(beta)-Math.cos(phi)*Math.sin(beta)*Math.cos(gamma))+Math.cos(del)*Math.cos(H)*(Math.cos(phi)*Math.cos(beta)+Math.sin(phi)*Math.sin(beta)*Math.cos(gamma))+Math.cos(del)*Math.sin(H)*Math.sin(beta)*Math.sin(gamma);
+ return clamp(cosInc,0,1)*shading;
+}
+function compute(weather,route){
+ const h=weather.hourly,times=h.time.map(x=>new Date(x)),now=Date.now(),pastIdx=times.map((t,i)=>({t,i})).filter(x=>x.t.getTime()<=now).map(x=>x.i),futureIdx=times.map((t,i)=>({t,i})).filter(x=>x.t.getTime()>now).map(x=>x.i);
+ const last=(hours)=>pastIdx.slice(-hours), next=(hours)=>futureIdx.slice(0,hours), vals=(arr,idx)=>idx.map(i=>Number(arr?.[i]??0)).filter(Number.isFinite);
+ const p72=last(72),p168=last(168),f72=next(72);const temp72=vals(h.temperature_2m,p72),temp168=vals(h.temperature_2m,p168),prec72=vals(h.precipitation,p72),snow72=vals(h.snowfall,p72),rain72=vals(h.rain,p72),wind72=vals(h.wind_speed_10m,p72),rad72=vals(h.shortwave_radiation,p72);
+ const fdh72=sum(temp72.map(t=>Math.max(0,-t))),warm72=sum(temp72.map(t=>Math.max(0,t))),freezeHours=temp72.filter(t=>t<=0).length,strongFreeze=temp72.filter(t=>t<=-3).length;
+ const thawCycles=(()=>{let n=0;for(let i=1;i<temp168.length;i++)if((temp168[i-1]<0&&temp168[i]>=0)||(temp168[i-1]>=0&&temp168[i]<0))n++;return n})();
+ const solarAdj=sum(p72.map((idx,j)=>rad72[j]*solarFactor(route.aspect,route.slope,times[idx].getHours(),times[idx],route.lat,route.shading)))/1000;
+ const profile=route.profile;
+ let formation=0, conservation=0;
+ if(profile==='ice'){formation=25+fdh72*.18+Math.min(18,sum(rain72)*1.8)+Math.min(12,thawCycles*1.5)-warm72*.11;conservation=80-warm72*.28-solarAdj*.08-sum(rain72)*2}
+ else if(profile==='snow'){formation=20+Math.min(45,sum(snow72)*1.8)+Math.min(17,fdh72*.08)+Math.min(10,avg(wind72)*.3)-sum(rain72)*2;conservation=74-warm72*.18-solarAdj*.05-sum(rain72)*2.5}
+ else if(profile==='mixed'){formation=22+Math.min(28,sum(snow72)*1.2)+Math.min(27,fdh72*.14)+Math.min(10,thawCycles)-warm72*.08;conservation=78-warm72*.22-solarAdj*.065-sum(rain72)*2}
+ else{formation=23+Math.min(32,sum(snow72)*1.35)+Math.min(31,fdh72*.15)+Math.min(10,thawCycles*.8)-warm72*.1;conservation=80-warm72*.23-solarAdj*.07-sum(rain72)*2.2}
+ formation=clamp(Math.round(formation),0,100);conservation=clamp(Math.round(conservation),0,100);
+ const completeness=['temperature_2m','precipitation','snowfall','wind_speed_10m','shortwave_radiation','freezing_level_height'].filter(k=>Array.isArray(h[k])&&h[k].length).length/6;
+ const confidence=clamp(Math.round(38+completeness*42+(route.altSource==='user'?12:5)-Math.min(15,Math.abs(weather.elevation-route.altitude)/150)),0,92);
+ const potential=Math.round(formation*.55+conservation*.45);
+ const factors=[
+  {label:`${fmt(fdh72)} degrés-heures de gel sur 72 h`,v:fdh72>60?1:fdh72<15?-1:0},
+  {label:`${freezeHours} h sous 0 °C, dont ${strongFreeze} h sous -3 °C`,v:strongFreeze>18?1:freezeHours<12?-1:0},
+  {label:`${fmt(sum(snow72),1)} cm de neige modélisée sur 72 h`,v:sum(snow72)>10?1:0},
+  {label:`${fmt(sum(rain72),1)} mm de pluie sur 72 h`,v:sum(rain72)>4?-1:0},
+  {label:`${fmt(solarAdj,1)} kWh/m² équivalents sur la pente`,v:solarAdj>10?-1:solarAdj<4?1:0},
+  {label:`Vent moyen ${fmt(avg(wind72))} km/h, pointe ${fmt(Math.max(0,...vals(h.wind_gusts_10m,p72)))} km/h`,v:avg(wind72)>45?-1:0}
+ ];
+ const futureTemp=vals(h.temperature_2m,f72),futureRain=vals(h.rain,f72),futureSnow=vals(h.snowfall,f72);
+ const trend=(sum(futureSnow)*1.3+sum(futureTemp.map(t=>Math.max(0,-t)))*.07)-(sum(futureRain)*2+sum(futureTemp.map(t=>Math.max(0,t)))*.12);
+ return {potential,formation,conservation,confidence,fdh72,warm72,freezeHours,strongFreeze,thawCycles,snow72:sum(snow72),rain72:sum(rain72),prec72:sum(prec72),solarAdj,wind:avg(wind72),trend:trend>8?'amélioration':trend<-8?'dégradation':'stable',factors,times,h};
+}
+function scoreColor(v){return v>=75?'#15803d':v>=55?'#b45309':'#b91c1c'}
+function scoreCard(label,v,sub){return `<div class="score"><small>${label}</small><b style="color:${scoreColor(v)}">${v}</b><span>/100</span><div class="bar"><i style="width:${v}%;background:${scoreColor(v)}"></i></div><div class="source">${sub}</div></div>`}
+function drawChart(canvas,analysis){
+ const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1,w=canvas.clientWidth,h=canvas.clientHeight;canvas.width=w*dpr;canvas.height=h*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+ const now=Date.now(),ids=analysis.times.map((t,i)=>({t,i})).filter(x=>Math.abs(x.t.getTime()-now)<=72*3600000).map(x=>x.i);if(!ids.length)return;
+ const temps=ids.map(i=>analysis.h.temperature_2m[i]),snow=ids.map(i=>analysis.h.snowfall[i]||0),pad={l:38,r:15,t:10,b:28},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,tmin=Math.min(-2,...temps),tmax=Math.max(2,...temps),x=j=>pad.l+j/(ids.length-1)*pw,y=v=>pad.t+(tmax-v)/(tmax-tmin)*ph;
+ ctx.strokeStyle='#cbd5e1';ctx.lineWidth=1;[-10,-5,0,5,10].filter(v=>v>=tmin&&v<=tmax).forEach(v=>{ctx.beginPath();ctx.moveTo(pad.l,y(v));ctx.lineTo(w-pad.r,y(v));ctx.stroke();ctx.fillStyle='#64748b';ctx.font='11px sans-serif';ctx.fillText(v+'°',3,y(v)+4)});
+ const maxSnow=Math.max(1,...snow);ctx.fillStyle='rgba(14,165,233,.25)';snow.forEach((v,j)=>{const bh=v/maxSnow*45;ctx.fillRect(x(j)-1,h-pad.b-bh,3,bh)});
+ ctx.strokeStyle='#dc2626';ctx.lineWidth=2;ctx.beginPath();temps.forEach((v,j)=>j?ctx.lineTo(x(j),y(v)):ctx.moveTo(x(j),y(v)));ctx.stroke();
+ const zero=y(0);ctx.strokeStyle='#334155';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(pad.l,zero);ctx.lineTo(w-pad.r,zero);ctx.stroke();ctx.setLineDash([]);
+ ctx.fillStyle='#64748b';ctx.font='11px sans-serif';[0,Math.floor(ids.length/2),ids.length-1].forEach(j=>ctx.fillText(analysis.times[ids[j]].toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}),x(j)-17,h-6));
+}
+function dailyCards(w,route){return w.daily.time.map((t,i)=>{const min=w.daily.temperature_2m_min[i],max=w.daily.temperature_2m_max[i],snow=w.daily.snowfall_sum[i]||0,rain=w.daily.rain_sum[i]||0,rad=w.daily.shortwave_radiation_sum[i]||0;let s=55+Math.min(20,snow*2)+Math.max(0,-min)*2-Math.max(0,max)*3-rain*2-rad*.8;s=clamp(Math.round(s),0,100);return `<div class="day"><strong>${new Date(t).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit'})}</strong><div class="big" style="color:${scoreColor(s)}">${s}/100</div><p>${fmt(min)} à ${fmt(max)} °C</p><p>Neige ${fmt(snow,1)} cm · pluie ${fmt(rain,1)} mm</p><p>Vent max ${fmt(w.daily.wind_speed_10m_max[i])} km/h</p></div>`}).join('')}
+function render(w,a,r){
+ $('headerStatus').textContent=`Calcul du ${new Date().toLocaleString('fr-FR')} · ${r.altitude} m · ${aspectNames[r.aspect]}`;
+ $('results').innerHTML=`<div class="scores">${scoreCard('Potentiel conditions',a.potential,'Formation et conservation')}${scoreCard('Formation',a.formation,'Accumulation, gel et transformation')}${scoreCard('Conservation',a.conservation,'Redoux, pluie et rayonnement')}${scoreCard('Confiance',a.confidence,'Qualité des données, sans observation terrain')}</div>
+ <div class="panel-grid"><section class="panel"><h2>Température et neige, ±72 heures</h2><div class="legend"><span><i class="dot" style="background:#dc2626"></i>Température</span><span><i class="dot" style="background:#0ea5e9"></i>Neige horaire</span><span>Pointillé : 0 °C</span></div><div class="chart-wrap"><canvas id="chart"></canvas></div></section>
+ <section class="panel"><h2>Diagnostic</h2><div class="facts"><div class="fact"><small>Tendance 72 h</small><b>${a.trend}</b></div><div class="fact"><small>Degrés-heures de gel</small><b>${fmt(a.fdh72)}</b></div><div class="fact"><small>Neige 72 h</small><b>${fmt(a.snow72,1)} cm</b></div><div class="fact"><small>Pluie 72 h</small><b>${fmt(a.rain72,1)} mm</b></div></div><h3 style="margin:13px 0 5px">Facteurs explicatifs</h3><div class="factor-list">${a.factors.map(f=>`<div class="factor"><span>${f.label}</span><b class="${f.v>0?'positive':f.v<0?'negative':'neutral'}">${f.v>0?'favorable':f.v<0?'défavorable':'neutre'}</b></div>`).join('')}</div></section></div>
+ <section class="panel" style="margin-top:12px"><h2>Fenêtre prévisionnelle sur 7 jours</h2><div class="daily">${dailyCards(w,r)}</div><p class="source">Les notes journalières sont un indicateur simplifié de fenêtre météo, pas une prévision de grimpabilité. Elles ne contiennent ni observation de glace, ni stabilité avalancheuse locale.</p></section>
+ <section class="panel" style="margin-top:12px"><h2>Sources et limites</h2><p class="source">Météo et altitude : API Open-Meteo, modèle sélectionné automatiquement par le service. Fond : CARTO et contributeurs OpenStreetMap. Le rayonnement sur pente est une correction géométrique simplifiée à partir du rayonnement horizontal et ne modélise pas l'horizon montagneux. Les scores sont heuristiques, non calibrés sur des retours terrain. Le BERA, Data-Avalanche, les sorties récentes et les webcams ne sont pas intégrés à cette version autonome.</p></section>`;
+ requestAnimationFrame(()=>drawChart($('chart'),a));
+}
+async function analyse(){const lat=Number($('lat').value),lng=Number($('lng').value);if(!Number.isFinite(lat)||!Number.isFinite(lng))return status('Cliquez d’abord sur la carte.','error');const btn=$('analyseBtn');btn.disabled=true;status('Récupération de l’altitude et des prévisions…');try{let alt=Number($('altitude').value),altSource='user';if(!Number.isFinite(alt)||alt<=0){alt=await getElevation(lat,lng);altSource='service';if(Number.isFinite(alt))$('altitude').value=Math.round(alt)}if(!Number.isFinite(alt))throw new Error('Altitude indisponible. Renseignez-la manuellement.');const route={name:$('name').value.trim()||'Point sans nom',lat,lng,altitude:alt,altSource,aspect:Number($('aspect').value),slope:Number($('slope').value),profile:$('profile').value,shading:Number($('shading').value)};const w=await getWeather(lat,lng,alt),a=compute(w,route);state.data=w;state.current=route;render(w,a,route);status('Analyse actualisée.','ok')}catch(e){status(`Analyse impossible : ${e.message}`,'error')}finally{btn.disabled=false}}
+$('analyseBtn').onclick=analyse;
+function saved(){try{return JSON.parse(localStorage.getItem('alpi.points.v1')||'[]')}catch{return[]}}function saveAll(v){localStorage.setItem('alpi.points.v1',JSON.stringify(v))}
+function renderSaved(){const box=$('savedList'),items=saved();box.replaceChildren();if(!items.length){box.innerHTML='<div class="status">Aucun point enregistré.</div>';return}items.forEach(p=>{const d=document.createElement('div');d.className='saved';const b=document.createElement('strong');b.textContent=p.name;const s=document.createElement('span');s.textContent=`${p.altitude} m · ${aspectNames[p.aspect]} · ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}`;d.append(b,s);d.onclick=()=>{setPoint(p.lat,p.lng);$('name').value=p.name;$('altitude').value=p.altitude;$('aspect').value=p.aspect;$('slope').value=p.slope;$('profile').value=p.profile;$('shading').value=p.shading;status('Point chargé. Lancez l’analyse.','ok')};box.appendChild(d)})}
+$('saveBtn').onclick=()=>{const lat=Number($('lat').value),lng=Number($('lng').value),alt=Number($('altitude').value);if(!Number.isFinite(lat)||!Number.isFinite(lng)||!Number.isFinite(alt))return status('Localisation et altitude nécessaires.','error');const p={name:$('name').value.trim()||`Point ${saved().length+1}`,lat,lng,altitude:alt,aspect:Number($('aspect').value),slope:Number($('slope').value),profile:$('profile').value,shading:Number($('shading').value)};const items=saved();items.push(p);saveAll(items);renderSaved();status('Point enregistré dans ce navigateur.','ok')};
+$('clearBtn').onclick=()=>{if(saved().length&&confirm('Supprimer tous les points enregistrés ?')){localStorage.removeItem('alpi.points.v1');renderSaved();status('Points supprimés.')}};
+window.addEventListener('resize',()=>{map.invalidateSize();if(state.data&&$('chart'))drawChart($('chart'),compute(state.data,state.current))});renderSaved();
+})();
+</script>
+</body>
+</html>
