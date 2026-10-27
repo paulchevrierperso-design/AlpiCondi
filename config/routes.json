@@ -1,0 +1,7 @@
+[
+  { "key": "spijeoles", "name": "Grand Dièdre — Pic des Spijeoles", "query": "Spijeoles Grand Dièdre", "c2cId": "", "lat": "", "lon": "", "alt": "", "ori": "", "massif": "" },
+  { "key": "lanches", "name": "Grasse Matinée — Pic des Grandes Lanches", "query": "Grasse Matinée Grandes Lanches", "c2cId": "", "lat": "", "lon": "", "alt": "", "ori": "", "massif": "" },
+  { "key": "pschitt", "name": "Goulotte Pschitt — Pointe Fourastier", "query": "Pschitt Fourastier", "c2cId": "", "lat": "", "lon": "", "alt": "", "ori": "", "massif": "" },
+  { "key": "malaza", "name": "Couloir Central — Malaza", "query": "Malaza couloir central", "c2cId": "", "lat": "", "lon": "", "alt": "", "ori": "", "massif": "" },
+  { "key": "quintana", "name": "Goulotte Quintana — Taillon", "query": "Quintana Taillon", "c2cId": "", "lat": "", "lon": "", "alt": "", "ori": "", "massif": "" }
+]
