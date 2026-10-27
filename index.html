@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veille goulottes & mixte</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div><h1>Veille goulottes & mixte</h1><p>Voies positionnées sur carte · météo J-14/J+4 · Camptocamp · BERA</p></div>
+  <div class="row">
+    <button type="button" id="addRoute" class="primary">+ Nouvelle voie</button>
+    <button type="button" id="analyzeAll">Analyser toutes les voies</button>
+    <button type="button" id="exportCfg">Exporter</button>
+    <label class="btn" for="importCfg">Importer</label><input type="file" id="importCfg" accept="application/json" hidden>
+  </div>
+</header>
+<main class="wrap">
+  <div class="layout">
+    <aside class="card">
+      <h3>Mes voies</h3>
+      <div id="routeList" class="rlist"></div>
+      <p id="noRoute" class="muted" style="font-size:13px">Aucune voie. Cliquer sur « + Nouvelle voie », puis sur la carte pour la positionner.</p>
+    </aside>
+
+    <section class="card">
+      <div class="maptools">
+        <input id="place" placeholder="Aller à un lieu (sommet, refuge, commune…)" aria-label="Recherche de lieu">
+        <button type="button" id="placeGo">Chercher</button>
+        <button type="button" id="fitAll">Voir toutes les voies</button>
+        <button type="button" id="showC2C" title="Itinéraires glace/mixte Camptocamp autour du centre de la carte">Itinéraires C2C ici</button>
+      </div>
+      <div id="placeResults" class="list"></div>
+      <div id="map" role="application" aria-label="Carte"></div>
+      <div id="mapHint" class="status muted">Sélectionner ou créer une voie, puis cliquer sur la carte pour la positionner (marqueur déplaçable).</div>
+    </section>
+  </div>
+
+  <section id="editor" class="card hidden">
+    <div class="grid2">
+      <div>
+        <h3>Identification de la voie</h3>
+        <div class="fields">
+          <label for="name">Nom</label><input id="name" placeholder="ex. Goulotte X — Pic Y">
+          <label for="lat">Latitude (WGS84)</label><input id="lat" type="number" step="any">
+          <label for="lon">Longitude (WGS84)</label><input id="lon" type="number" step="any">
+          <label for="alt">Altitude de la voie (m)</label><input id="alt" type="number" step="1" placeholder="ex. 2800">
+          <span>Exposition</span>
+          <div class="oribtns" id="oriBtns" role="group" aria-label="Exposition"></div>
+          <label for="massif">ID massif BERA</label><input id="massif" inputmode="numeric" placeholder="facultatif">
+          <label for="c2cId">ID itinéraire C2C</label><input id="c2cId" inputmode="numeric" placeholder="facultatif (sorties sur la voie)">
+          <label for="notes">Notes</label><input id="notes" placeholder="approche, descente, remarques…">
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button type="button" id="analyze" class="primary">Analyser cette voie</button>
+          <button type="button" id="delete" class="danger">Supprimer</button>
+          <span id="saveState" class="muted" style="font-size:13px"></span>
+        </div>
+      </div>
+      <div>
+        <h3>Formation probable (indicatif)</h3>
+        <div id="formation" class="muted">Positionner la voie, renseigner altitude et exposition, puis analyser.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="wxCard" class="card hidden"><h3>Météo à l'altitude de la voie — J-14 à J+4</h3><div id="chart" class="chart muted">—</div></section>
+
+  <div id="bottom" class="grid2 hidden">
+    <section class="card"><h3>Retours terrain Camptocamp</h3>
+      <div class="row"><select id="outMode" aria-label="Source des sorties"><option value="area">Sorties glace/mixte du secteur (±5 km)</option><option value="route">Sorties de l'itinéraire C2C (ID requis)</option></select><button type="button" id="loadOutings">Actualiser</button></div>
+      <div id="outStatus" class="status"></div><div id="outings" class="list"></div>
+    </section>
+    <section class="card"><h3>Risque avalanche</h3>
+      <div id="bera" class="muted">—</div>
+      <div class="row" style="margin-top:10px">
+        <a class="btn" href="https://meteofrance.com/meteo-montagne" target="_blank" rel="noopener">BERA Météo-France</a>
+        <a class="btn" id="daLink" href="https://www.data-avalanche.org/" target="_blank" rel="noopener">Data-Avalanche</a>
+      </div>
+      <p class="muted" style="font-size:13px">Data-Avalanche n'a pas d'API publique documentée : consulter la carte des avalanches récentes autour de la voie.</p>
+    </section>
+  </div>
+  <section id="decCard" class="card hidden"><h3>Synthèse</h3><div id="decision" class="decision">Analyse non lancée.</div></section>
+</main>
+<footer>Aide à la veille. Le score de formation est un modèle empirique : il ne remplace ni l'observation terrain, ni le BERA, ni le jugement en montagne.<br>Fonds : © contributeurs OpenStreetMap, OpenTopoMap (CC-BY-SA), IGN Géoplateforme. Géocodage : Nominatim.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="app.js"></script>
+</body>
+</html>
