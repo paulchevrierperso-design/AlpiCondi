@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Alpi, veille personnelle des conditions d’itinéraires hivernaux.">
+  <title>Alpi · Veille des conditions</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div><h1>Alpi</h1><p>Veille des conditions d’itinéraires hivernaux</p></div>
+  <button id="theme" type="button" aria-label="Changer de thème">◐</button>
+</header>
+<main>
+  <section class="notice" role="note"><strong>Outil d’aide à l’analyse.</strong> Il ne confirme ni la praticabilité ni la sécurité d’un itinéraire. Le BERA, les observations récentes et une analyse terrain restent indispensables.</section>
+  <section class="panel">
+    <h2>Importer une voie Camptocamp</h2>
+    <form id="importForm">
+      <label for="routeUrl">URL de la voie</label>
+      <div class="row"><input id="routeUrl" name="url" type="url" required placeholder="https://www.camptocamp.org/routes/123456/fr/..." autocomplete="url"><button type="submit">Prévisualiser</button></div>
+      <p class="hint">Seuls les documents <code>/routes/&lt;identifiant&gt;</code> sont acceptés.</p>
+    </form>
+    <div id="status" class="status" aria-live="polite"></div>
+    <article id="preview" class="preview hidden"></article>
+  </section>
+  <section class="panel">
+    <div class="section-head"><div><h2>Voies surveillées</h2><p id="count">0 voie</p></div><button id="exportBtn" class="secondary" type="button">Exporter JSON</button></div>
+    <div id="empty" class="empty">Aucune voie. Collez une URL Camptocamp pour commencer.</div>
+    <div id="routes" class="cards"></div>
+  </section>
+</main>
+<footer>Données enregistrées uniquement dans ce navigateur pour ce MVP.</footer>
+<script src="app.js" defer></script>
+</body>
+</html>
